@@ -1141,4 +1141,367 @@
 
 
             const box =
-                document.createElement
+                document.createElement(
+                    "div"
+                );
+
+
+            box.className =
+                "day";
+
+
+            /*
+                Destacar o dia atual.
+            */
+
+            if (
+                year ===
+                    today.getFullYear() &&
+
+                month ===
+                    today.getMonth() &&
+
+                day ===
+                    today.getDate()
+            ) {
+
+                box.classList.add(
+                    "today"
+                );
+
+            }
+
+
+            const number =
+                document.createElement(
+                    "div"
+                );
+
+
+            number.className =
+                "num";
+
+
+            number.textContent =
+                day;
+
+
+            box.appendChild(
+                number
+            );
+
+
+            /*
+                BOTÃO DE IDA
+            */
+
+            box.appendChild(
+                rideButton(
+                    "ida",
+                    record,
+                    dateKey
+                )
+            );
+
+
+            /*
+                BOTÃO DE VOLTA
+            */
+
+            box.appendChild(
+                rideButton(
+                    "volta",
+                    record,
+                    dateKey
+                )
+            );
+
+
+            grid.appendChild(
+                box
+            );
+
+        }
+
+
+        updateSummary();
+
+    }
+
+
+    /* =====================================================
+       MÊS ANTERIOR
+    ===================================================== */
+
+    document
+        .getElementById("prevBtn")
+        .onclick = () => {
+
+            current =
+                new Date(
+                    current.getFullYear(),
+                    current.getMonth() - 1,
+                    1
+                );
+
+
+            render();
+
+        };
+
+
+    /* =====================================================
+       PRÓXIMO MÊS
+    ===================================================== */
+
+    document
+        .getElementById("nextBtn")
+        .onclick = () => {
+
+            current =
+                new Date(
+                    current.getFullYear(),
+                    current.getMonth() + 1,
+                    1
+                );
+
+
+            render();
+
+        };
+
+
+    /* =====================================================
+       VOLTAR PARA HOJE
+    ===================================================== */
+
+    document
+        .getElementById("todayBtn")
+        .onclick = () => {
+
+            const now =
+                new Date();
+
+
+            current =
+                new Date(
+                    now.getFullYear(),
+                    now.getMonth(),
+                    1
+                );
+
+
+            render();
+
+        };
+
+
+    /* =====================================================
+       LIMPAR MÊS
+    ===================================================== */
+
+    document
+        .getElementById("clearBtn")
+        .onclick = () => {
+
+            const year =
+                current.getFullYear();
+
+            const month =
+                current.getMonth();
+
+
+            const days =
+                new Date(
+                    year,
+                    month + 1,
+                    0
+                ).getDate();
+
+
+            const confirmed =
+                confirm(
+                    "Limpar todos os registros deste mês?"
+                );
+
+
+            if (!confirmed) {
+                return;
+            }
+
+
+            for (
+                let day = 1;
+                day <= days;
+                day++
+            ) {
+
+                delete records[
+                    key(
+                        year,
+                        month,
+                        day
+                    )
+                ];
+
+            }
+
+
+            save();
+
+            render();
+
+        };
+
+
+    /* =====================================================
+       INSTALAÇÃO PWA
+    ===================================================== */
+
+    let deferredInstallPrompt =
+        null;
+
+
+    const installBtn =
+        document.getElementById(
+            "installBtn"
+        );
+
+
+    /*
+        O navegador dispara esse evento
+        quando o site pode ser instalado.
+    */
+
+    window.addEventListener(
+        "beforeinstallprompt",
+        (event) => {
+
+            event.preventDefault();
+
+
+            deferredInstallPrompt =
+                event;
+
+
+            installBtn.hidden =
+                false;
+
+        }
+    );
+
+
+    /*
+        Quando clicar em instalar.
+    */
+
+    installBtn.addEventListener(
+        "click",
+        async () => {
+
+            if (
+                !deferredInstallPrompt
+            ) {
+
+                return;
+
+            }
+
+
+            deferredInstallPrompt.prompt();
+
+
+            const choice =
+                await
+                deferredInstallPrompt
+                    .userChoice;
+
+
+            if (
+                choice.outcome ===
+                "accepted"
+            ) {
+
+                installBtn.hidden =
+                    true;
+
+            }
+
+
+            deferredInstallPrompt =
+                null;
+
+        }
+    );
+
+
+    /*
+        Quando o aplicativo
+        for instalado.
+    */
+
+    window.addEventListener(
+        "appinstalled",
+        () => {
+
+            installBtn.hidden =
+                true;
+
+
+            deferredInstallPrompt =
+                null;
+
+        }
+    );
+
+
+    /* =====================================================
+       SERVICE WORKER
+    ===================================================== */
+
+    if (
+        "serviceWorker"
+        in navigator
+    ) {
+
+        window.addEventListener(
+            "load",
+            () => {
+
+                navigator
+                    .serviceWorker
+                    .register("./sw.js")
+                    .then(() => {
+
+                        console.log(
+                            "Controle de Táxi: aplicativo PWA ativado."
+                        );
+
+                    })
+                    .catch(
+                        (error) => {
+
+                            console.warn(
+                                "Erro no Service Worker:",
+                                error
+                            );
+
+                        }
+                    );
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       INICIAR
+    ===================================================== */
+
+    render();
+
+</script>
+
+</body>
+</html>
